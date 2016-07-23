@@ -124,7 +124,9 @@ view model =
             ]
         <|
             [ defs model.view ]
-                ++ content
+                ++ [Svg.g [ SA.transform ("translate(0," ++ toString h ++ ") scale(1,-1)") ] content
+                   , Svg.circle [cx "0", cy "0", r "3", fill "red"] []
+                   ]
 
 
 defs : BatteryView -> Svg Msg
@@ -160,8 +162,9 @@ shell { view, viewType } =
                     { stroke = "url(#" ++ (grad status) ++ ")", width = thickness }
             in
                 Svg.g []
-                    [ svgRect 0 0 w h { stroke = (color' defaultColor), width = 1 } "none"
-                    , frame view gradStroke
+                    [
+                    -- svgRect 0 0 w h { stroke = (color' defaultColor), width = 1 } "none"
+                    frame view gradStroke
                     , terminal view gradStroke
                     ]
 
@@ -259,7 +262,7 @@ barf status ({ bars, thickness, spacing, w } as vm) idx ( list, power ) =
 time : Model -> Svg Msg
 time model =
     Svg.g --todo
-    [] [] 
+    [] []
 
 
 
