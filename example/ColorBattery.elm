@@ -159,7 +159,7 @@ shell { view, viewType } =
                     view
 
                 gradStroke =
-                    { stroke = "url(#" ++ (grad status) ++ ")", width = thickness }
+                    { stroke = "url(#" ++ (grad status True) ++ ")", width = thickness }
             in
                 Svg.g []
                     [
@@ -250,7 +250,7 @@ barf status ({ bars, thickness, spacing, w } as vm) idx ( list, power ) =
                         barWidth
                         ((barHeight vm) * barPercent)
                         { stroke = "none", width = 0 }
-                        ("url(#" ++ (grad status) ++ ")")
+                        ("url(#" ++ (grad status False) ++ ")")
                    ]
             , power - drainPerBar
             )
@@ -283,18 +283,17 @@ barHeight vm =
         (powerHeight vm - ((barF - 1) * vm.spacing)) / barF
 
 
-grad : BatteryStatus -> String
-grad status =
-    if status.isCharging then
+grad : BatteryStatus -> Bool -> String
+grad status withCharging =
+    if status.isCharging && withCharging then
         "charging"
-    else if status.level > 0.5 then
-        "full"
-    else if (status.level > 0.25 && status.level < 0.5) then
-        "half"
-    else if status.level < 0.25 then
-        "empty"
     else
-        Debug.crash "it's either you or me"
+      if status.level > 0.5 then
+        "full"
+      else if (status.level > 0.25 && status.level < 0.5) then
+        "half"
+      else
+        "empty"
 
 
 
