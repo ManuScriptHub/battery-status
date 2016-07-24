@@ -52,11 +52,11 @@ type Msg
 
 sample1 : BatteryView
 sample1 =
-    { h = 150
-    , w = 100
-    , thickness = 5
-    , spacing = 1
-    , bars = 5
+    { h = 480
+    , w = 300
+    , thickness = 24
+    , spacing = 20
+    , bars = 4
     , chargeColor = Color.red
     , defaultColor = Color.black
     }
@@ -108,13 +108,19 @@ view model =
         content =
             case model.viewType of
                 Supported status ->
+                  Svg.g [ SA.transform ("translate(0," ++ toString h ++ ") scale(1,-1)") ]
                     [ shell model
                     , level model
                       --, time model
                     ]
 
                 Unsupported string ->
-                    [ text string ]
+                    Svg.text' [ x "0"
+                               , y "0"
+                               , fontFamily "Verdana"
+                               , fontSize "25"
+                               ] [ text string ]
+
     in
         Svg.svg
             [ SA.version "1.1"
@@ -124,7 +130,7 @@ view model =
             ]
         <|
             [ defs model.view ]
-                ++ [Svg.g [ SA.transform ("translate(0," ++ toString h ++ ") scale(1,-1)") ] content
+                ++ [ content
                    , Svg.circle [cx "0", cy "0", r "3", fill "red"] []
                    ]
 
@@ -188,7 +194,7 @@ frame ({ w, thickness } as view) gradStroke =
 
 frameHeight : BatteryView -> Float
 frameHeight ({ h, spacing, thickness } as vm) =
-    0.9 * (h - (2 * thickness) - spacing)
+    0.9 * (h - thickness - (2 * spacing))
 
 
 terminal : BatteryView -> Stroke -> Svg a
@@ -202,7 +208,7 @@ terminal ({ w, h, thickness } as vm) gradStroke =
 
 terminalHeight : BatteryView -> Float
 terminalHeight { h, thickness, spacing } =
-    0.1 * (h - (2 * thickness) - spacing)
+    0.1 * (h - thickness - (2 * spacing))
 
 
 powerHeight : BatteryView -> Float
