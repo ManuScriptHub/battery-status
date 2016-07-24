@@ -108,19 +108,24 @@ view model =
         content =
             case model.viewType of
                 Supported status ->
-                  Svg.g [ SA.transform ("translate(0," ++ toString h ++ ") scale(1,-1)") ]
-                    [ shell model
-                    , level model
-                      --, time model
-                    ]
+                    Svg.g []
+                        [ Svg.g
+                            [ SA.transform ("translate(0," ++ toString h ++ ") scale(1,-1)")
+                            ]
+                            [ shell model
+                            , level model
+                            ]
+                        , time model
+                        ]
 
                 Unsupported string ->
-                    Svg.text' [ x "0"
-                               , y "0"
-                               , fontFamily "Verdana"
-                               , fontSize "25"
-                               ] [ text string ]
-
+                    Svg.text'
+                        [ x "0"
+                        , y "0"
+                        , fontFamily "Arial Black"
+                        , fontSize "45"
+                        ]
+                        [ text string ]
     in
         Svg.svg
             [ SA.version "1.1"
@@ -131,7 +136,7 @@ view model =
         <|
             [ defs model.view ]
                 ++ [ content
-                   , Svg.circle [cx "0", cy "0", r "3", fill "red"] []
+                   , Svg.circle [ cx "0", cy "0", r "3", fill "red" ] []
                    ]
 
 
@@ -168,9 +173,8 @@ shell { view, viewType } =
                     { stroke = "url(#" ++ (grad status True) ++ ")", width = thickness }
             in
                 Svg.g []
-                    [
-                    -- svgRect 0 0 w h { stroke = (color' defaultColor), width = 1 } "none"
-                    frame view gradStroke
+                    [ -- svgRect 0 0 w h { stroke = (color' defaultColor), width = 1 } "none"
+                      frame view gradStroke
                     , terminal view gradStroke
                     ]
 
@@ -262,14 +266,27 @@ barf status ({ bars, thickness, spacing, w } as vm) idx ( list, power ) =
             )
 
 
-
-
-
 time : Model -> Svg Msg
-time model =
-    Svg.g --todo
-    [] []
+time { view, viewType } =
+    case viewType of
+        Supported status ->
+          Svg.g [] [ showTime (view.thickness) ((view.thickness + 2 * view.spacing)  + terminalHeight view) (view.h  / 8) status.dischargingTime 90
+                   , showTime (view.w - view.thickness) (view.h - view.thickness) (view.h  / 8) status.chargingTime -90
+                   ]
+        _ ->
+            empty
 
+
+showTime : a -> b -> c -> d -> e ->  Svg f
+showTime cx cy size text rot =
+    Svg.text'
+        [ x "0"
+        , y "0"
+        , transform <| "translate(" ++ (toString cx) ++ ", " ++ (toString cy) ++ ") rotate (" ++ (toString rot) ++ " 0 0)"
+        , fontFamily "Arial Black"
+        , fontSize <| toString size
+        ]
+        [ Svg.text <| Debug.log "cht" <| toString text ]
 
 
 -- CALC HELPERS
@@ -293,12 +310,11 @@ grad : BatteryStatus -> Bool -> String
 grad status withCharging =
     if status.isCharging && withCharging then
         "charging"
-    else
-      if status.level > 0.5 then
+    else if status.level > 0.5 then
         "full"
-      else if (status.level > 0.25 && status.level < 0.5) then
+    else if (status.level > 0.25 && status.level < 0.5) then
         "half"
-      else
+    else
         "empty"
 
 

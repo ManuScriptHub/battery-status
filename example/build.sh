@@ -1,1 +1,1 @@
-elm-make ./Main.elm --output ./build/main.js
+elm-make ./ColorBattery.elm --output ./build/main.js
